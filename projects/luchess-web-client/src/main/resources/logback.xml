@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="nopex-console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date{HH:mm:ss,SSS} %-5level %logger{36} - %message%n%nopex</pattern>
+        </encoder>
+    </appender>
+    
+    <appender name="stacktrace-console" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>error</level>
+        </filter>    
+        <encoder>
+            <pattern>%throwable{2}</pattern>
+        </encoder>
+    </appender>
+    
+    <root level="INFO">
+        <appender-ref ref="nopex-console" />
+        <appender-ref ref="stacktrace-console" />
+    </root>
+</configuration>

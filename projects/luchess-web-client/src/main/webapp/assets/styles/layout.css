@@ -1,0 +1,85 @@
+/**
+* Layout rules.
+*/
+
+#page-container {
+    margin-top: 30px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 1024px;
+}
+
+#messages {
+    margin-left: 20px;
+}
+
+#page-content {
+    border: ridge 2px #C4A570;
+    padding: 10px;
+}
+
+#page-content > div {
+    margin: 5px 0;
+}
+
+/**
+* Navigation Rules 
+*/
+
+.navItem {
+    background-color: #C4A570;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    color: #F5F4DF;
+    display: inline-block;
+    font-weight: 700;
+    margin-left: 20px;
+    padding: 5px;
+    text-align: center;
+    text-decoration: none;
+    width: 90px;
+}
+
+.navItem:hover {
+    background-color: #D8B67B;
+}
+
+/**
+* Messages Rules 
+*/
+
+.msgInfo {
+    color: #0c0;
+}
+
+.msgWarning {
+    color: #ff9603;
+}
+
+.msgError {
+    color: #c00;
+}
+
+.msgFatal {
+    color: #c449c2;
+}
+
+/**
+* Input component
+*/
+
+.input>* {
+    margin: 3px 0;
+}
+
+.input>:first-child {
+    display: inline-block;
+}
+
+.input>:first-child:after {
+    content: "\0020 \003a \0020"; /* adding a space-colon-space after the text label */
+}
+
+.input>:last-child {
+    color: #aaa;
+}

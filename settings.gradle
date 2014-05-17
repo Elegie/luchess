@@ -1,0 +1,8 @@
+include "projects/luchess-pgn", "projects/luchess-core", "projects/luchess-app-lucene_4x", "projects/luchess-web-framework", "projects/luchess-web-client", "projects/luchess-web-launcher"
+
+project(":projects/luchess-pgn").name = "luchess-pgn"
+project(":projects/luchess-core").name = "luchess-core"
+project(":projects/luchess-app-lucene_4x").name = "luchess-app-lucene_4x"
+project(":projects/luchess-web-framework").name = "luchess-web-framework"
+project(":projects/luchess-web-client").name = "luchess-web-client"
+project(":projects/luchess-web-launcher").name = "luchess-web-launcher"

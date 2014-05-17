@@ -1,0 +1,9 @@
+
+#content {
+    position: static !important;
+}
+
+#summary {
+    display: none !important;
+}
+

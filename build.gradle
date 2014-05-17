@@ -1,0 +1,237 @@
+/**
+* Build & run with Jetty:
+* - Run "gradle luchess-web-client:jettyRun" (or jettyRunWar to run from war).
+*
+* Build and test (standard Gradle):
+* - Run "gradle build".
+* - Run "gradle test".
+*
+* Other admin tasks:
+* - To build the Javadoc for all modules, run "gradle doc".
+* - To perform sonar analysis, start Sonar then run "gradle sonarRunner".
+* - To create a backup for all sources, run "gradle backup".
+*
+* IDE settings (using Eclipse and Gradle):
+* - Build the project once, using "gradle build" (gradle bug 1766?).
+* - Install a recent version of Eclipse (tested Juno).
+* - Configure a Java 1.7 JDK.
+* - Install (upgrade) the Gradle Plugin for Eclipse if needed.
+* - Do File / Import / Gradle Project, build the model then finish the import.
+*
+* Gradle settings:
+* - Install a recent version of Gradle (tested 1.11).
+* - Set a GRADLE_HOME environment variable, with its value pointing to the gradle directory, then add it to the system path.
+* - Set a GRADLE_OPTS environment variable, with its value to "-XX:MaxPermSize=512m", if you use a Java version < 1.8.
+*
+* Sonar settings:
+* - Install a recent version of Sonar (tested 4.2).
+* - Set a SONAR_HOME environment variable, with its value pointing to the sonar directory, then add it to the system path.
+* - Connection data for the script are currently consistent with the default configuration. Update accordingly.
+*/
+
+apply plugin: 'java'
+apply plugin: 'sonar-runner'
+
+// --- Globals ----------------------------------------------------------------
+
+ext {
+  // Names and Versions
+  LuchessProjectName = "Luchess"
+  LuchessProjectVersion = "1.0.0"
+  LuceneVersion = "4.7.0"
+  FreemarkerVersion = "2.3.20"
+  JUnitVersion = "4.11"
+  MockitoVersion = "1.9.5"
+  FESTVersion = "1.2.1"
+  LogBackClassicVersion = "1.1.1"
+  JCharDetVersion = "1.0"
+  ServletAPIVersion = "2.5"
+  JettyVersion = "9.1.3.v20140225"
+  JettyPort = 9001
+  
+  // Directories / Names for all subprojects
+  LuchessPGN = "luchess-pgn"
+  LuchessCore = "luchess-core"
+  LuchessAppLucene_4x = "luchess-app-lucene_4x"
+  LuchessWebFramework = "luchess-web-framework"
+  LuchessWebClient = "luchess-web-client"
+  LuchessWebLauncher = "luchess-web-launcher"
+  
+  // Other directories
+  backupDir = new File("backup")
+  javadocDir = new File("doc/javadoc")
+  manualsDir = new File("doc/manuals")
+}
+
+// --- Common -----------------------------------------------------------------
+
+version = LuchessProjectVersion
+
+allprojects {
+  apply plugin: 'java'
+  apply plugin: 'jacoco'
+  sourceCompatibility = 1.7
+  targetCompatibility = 1.7
+  version = LuchessProjectVersion
+  jar {
+    manifest.attributes provider: "gradle"
+    manifest.attributes author: "Elegie de Saya"
+    manifest.attributes version: version
+  }
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    compile "ch.qos.logback:logback-classic:" + LogBackClassicVersion
+    testCompile "junit:junit:" + JUnitVersion
+  }  
+  test {
+    jacoco {
+      destinationFile = file("$buildDir/jacoco/jacoco.exec")
+    }
+  }
+  sonarRunner {
+    sonarProperties {
+      property "sonar.projectVersion", LuchessProjectVersion
+      property "sonar.junit.reportsPath", test.reports.junitXml.destination
+      property "sonar.jacoco.reportPath", "$buildDir/jacoco/jacoco.exec"
+    }
+  } 
+}
+
+project(LuchessPGN) {
+  sonarRunner {
+    sonarProperties {
+      property "sonar.projectKey", LuchessPGN
+    }
+  }  
+}
+
+project(LuchessCore) {
+  evaluationDependsOn(":" + LuchessPGN)
+  dependencies {
+    compile "net.sourceforge.jchardet:jchardet:" + JCharDetVersion
+    compile project(":" + LuchessPGN)
+    testCompile project(":" + LuchessPGN).sourceSets.test.runtimeClasspath
+  }
+  sonarRunner {
+    sonarProperties {
+      property "sonar.projectKey", LuchessCore
+    }
+  }  
+}
+
+project(LuchessAppLucene_4x) {
+  evaluationDependsOn(":" + LuchessCore)
+  dependencies {
+    compile "org.apache.lucene:lucene-core:" + LuceneVersion
+    compile "org.apache.lucene:lucene-analyzers-common:" + LuceneVersion
+    compile "org.apache.lucene:lucene-queries:" + LuceneVersion
+    compile "org.apache.lucene:lucene-queryparser:" + LuceneVersion
+    compile project(":" + LuchessPGN)
+    compile project(":" + LuchessCore)
+    testCompile project(":" + LuchessCore).sourceSets.test.runtimeClasspath
+  }
+  sonarRunner {
+    sonarProperties {
+      property "sonar.projectKey", LuchessAppLucene_4x
+    }
+  }  
+}
+
+project(LuchessWebFramework) {
+  apply plugin: "eclipse"
+  configurations { providedCompile }
+  dependencies {
+    compile "org.freemarker:freemarker:" + FreemarkerVersion
+    testCompile "org.mockito:mockito-core:" + MockitoVersion
+    providedCompile "javax.servlet:servlet-api:" + ServletAPIVersion
+  }
+  sourceSets.main.compileClasspath += configurations.providedCompile
+  sourceSets.test.compileClasspath += configurations.providedCompile
+  sourceSets.test.runtimeClasspath += configurations.providedCompile
+  eclipse.classpath.plusConfigurations += configurations.providedCompile
+  sonarRunner {
+    sonarProperties {
+      property "sonar.projectKey", LuchessWebFramework
+    }
+  }  
+}
+
+project(LuchessWebClient) {
+  apply plugin: "war"
+  apply plugin: "jetty"
+  evaluationDependsOn(":" + LuchessAppLucene_4x)
+  evaluationDependsOn(":" + LuchessWebFramework)
+  jettyRun {
+      httpPort = JettyPort
+  }
+  dependencies {
+    compile project(":" + LuchessAppLucene_4x)
+    compile project(":" + LuchessWebFramework)
+  }
+  sonarRunner {
+    sonarProperties {
+      property "sonar.projectKey", LuchessWebClient
+    }
+  }  
+}
+
+project(LuchessWebLauncher) {
+  sonarRunner {
+    sonarProperties {
+      property "sonar.projectKey", LuchessWebLauncher
+    }
+  }
+  jar {
+    from {configurations.compile.collect {zipTree(it)}}   
+    manifest.attributes "Main-Class": "io.elegie.luchess.web.launcher.Launcher"
+  }
+  dependencies {
+    compile "org.eclipse.jetty:jetty-webapp:" + JettyVersion
+    testCompile "org.easytesting:fest-swing:" + FESTVersion
+  }
+}
+
+// --- Javadoc ----------------------------------------------------------------
+
+task doc(type: Javadoc) {
+  if(javadocDir.exists()) {
+    delete javadocDir
+  }
+  subprojects.each { subproject ->
+    source += subproject.sourceSets.main.allJava
+    classpath += subproject.sourceSets.main.compileClasspath
+  }
+  destinationDir = javadocDir
+  options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
+}
+
+// --- Backup -----------------------------------------------------------------
+
+task backup(type: Zip) {
+  archiveName LuchessProjectName + "-" + new Date().format("yyyyMMddHHmmss") + ".zip"
+  destinationDir backupDir
+  subprojects.collect { project ->
+    from(project.sourceSets.main.allJava) {
+      into(project.getName() + "/src/main/java")
+    }
+    from(project.sourceSets.main.resources) {
+      into(project.getName() + "/src/main/resources")
+    }    
+    from(project.sourceSets.test.allJava) {
+      into(project.getName() + "/src/test/java")
+    }
+    from(project.sourceSets.test.resources) {
+      into(project.getName() + "/src/test/resources")
+    }
+    if (project.hasProperty('webAppDir')) {
+      from(project.webAppDir) {
+        into project.getName() + '/' + project.webAppDirName
+      }
+    }
+  }
+  from(manualsDir)
+  from("settings.gradle")
+  from("build.gradle")
+}

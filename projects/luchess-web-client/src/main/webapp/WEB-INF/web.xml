@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+    version="2.5">
+    <display-name>Luchess</display-name>
+    
+    <filter>
+        <filter-name>ResourceDispatcher</filter-name>
+        <filter-class>io.elegie.luchess.web.framework.ResourceDispatcher</filter-class>
+        <init-param>
+            <param-name>framework.dispatcher.app</param-name>
+            <param-value>/app</param-value>
+        </init-param>
+        <init-param>
+            <param-name>framework.dispatcher.assets</param-name>
+            <param-value>/assets</param-value>
+        </init-param>        
+    </filter>
+    <filter-mapping>
+        <filter-name>ResourceDispatcher</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    
+    <servlet>
+        <servlet-name>FrontServlet</servlet-name>
+        <servlet-class>io.elegie.luchess.web.framework.FrontServlet</servlet-class>
+        <init-param>
+            <param-name>framework.context.factory.class</param-name>
+            <param-value>io.elegie.luchess.web.client.ClientContextFactory</param-value>
+        </init-param>
+        <init-param>
+            <param-name>luchess-app.configuration.file</param-name>
+            <param-value>luchess-app.properties</param-value>
+        </init-param>
+        <init-param>
+            <param-name>luchess-web.configuration.file</param-name>
+            <param-value>luchess-web.properties</param-value>
+        </init-param>        
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>FrontServlet</servlet-name>
+        <url-pattern>/app/*</url-pattern>
+    </servlet-mapping>
+    
+    <error-page>
+        <error-code>403</error-code>
+        <location>/app/error</location>
+    </error-page>
+    <error-page>
+        <error-code>404</error-code>
+        <location>/app/error</location>
+    </error-page>    
+    <error-page>
+        <error-code>500</error-code>
+        <location>/app/error</location>
+    </error-page>
+    <error-page>
+        <error-code>503</error-code>
+        <location>/app/error</location>
+    </error-page>
+</web-app>

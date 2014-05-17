@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Luchess User Guide</title>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="resources/styles/screen.css"/>
+    <link rel="stylesheet" type="text/css" media="print" href="resources/styles/print.css"/>
+    <link rel="shortcut icon" href="images/favicon.ico"/>
+    <script type="text/javascript" src="resources/scripts/dom.js"></script>
+    <script type="text/javascript" src="resources/scripts/summary.js"></script>
+</head>
+<body>
+<div id="content">
+    <h1 id="userGuide">Luchess User Guide</h1>
+    
+    <h2 id="about">About</h2>
+    
+    <p>
+    Luchess is a web application which lets you index chess games, and search for these games, either by some player's name and rank,
+    or some opening moves. It is based on the popular <a href="http://lucene.apache.org/core/">Lucene</a> search library, and should be able to handle 
+    large volumes of chess games (say, many millions), giving you relevant search results in a matter of a few milliseconds.
+    </p>
+    
+    <p>
+    Luchess is free and open source, currently available in English and French. You may run it for your personal pleasure, or for your friends. If you're a programmer, you may even
+    reuse parts of it (check the <a href="developer.html">developer guide</a>, though). I do not know whether other chess-related programs provide
+    the same service as Luchess. As it appears, searching chess games should be quite important to chess players, so I'm pretty sure there are some lurking around, 
+    and certainly better at this job than Luchess.
+    </p>
+    
+    <h2 id="installation">Installation</h2>
+    
+    <h3 id="installation-launcher">Running Luchess with its launcher</h3>
+    
+    <p>
+    The simplest way to run Luchess is through the Luchess launcher. Go to the <span class="highlight">dist</span> directory, and grab the two programs you'll find there:
+    <span class="highlight">luchess-web-client-1.0.0.war</span> and <span class="highlight">luchess-web-launcher-1.0.0.jar</span>.
+    Put them together inside a directory, then execute the launcher, accept any firewall request, and press the start button (see below if you run into problems).
+    </p>
+    
+    <img src="resources/images/launcher.png" alt="Running the launcher" />
+    
+    <p>
+    Congratulations, you've just started your own java web server (called <a href="http://www.eclipse.org/jetty/">Jetty</a>)! You can now
+    open your favorite browser, and navigate to the URL written in the launcher (something like <a href="http://localhost:9001/">http://localhost:9001/</a>).
+    </p>
+    
+    <p>
+    Now, many things can go wrong. Let's review the most common issues:
+    </p>
+    
+    <ul>
+    <li>
+    <strong>Java is missing or not up-to-date!</strong> Luchess uses Java to run, so you need to have Java installed on your computer. Also, Luchess requires
+    the version <span class="highlight">1.7</span> of Java - because prior versions are slower and have security vulnerabilities. If you want to check your java version, just run
+    <span class="highlight">java -version</span> anywhere in your command line. If it's not valid, then download and install the 1.7 Java Runtime Environment (JRE) from
+    <a href="http://www.oracle.com/technetwork/java/javase/downloads/jre7-downloads-1880261.html">Oracle's Java web site</a>. 
+    </li>
+    <li>
+    <strong>The ".jar" extension is opened with some zip utility!</strong> Well, the "jar" format is indeed a zip-like format, so it's not unexpected. Simply
+    right-click the launcher file, and select "Open With", choosing "Java Platform SE binary". If you prefer, you may also run the following command line, from the
+    directory where you have copied the two files: <span class="highlight">java -jar luchess-web-launcher-1.0.0.jar</span>.
+    </li>
+    </ul>
+    
+    <h3 id="installation-config">Configure your own games</h3>
+    
+    <p>
+    The Luchess application comes with a sample of chess games, and by default stores the index of the games into memory. As a result, users can try and
+    test the application right after downloading it, without any need for configuration.
+    Now, if you intend to use Luchess in a more regular way, you'll want not only to use your own set of games, but also keep the index on disk, so as to not
+    calculate it each time you start the application. You can do so by updating the Luchess configuration files (there are two of them).
+    </p>
+    
+    <p>
+    Before we explain how to configure Luchess, let us talk a bit about the format of the chess games. Luchess works with only one format, but fortunately
+    one of the most popular: <a href="http://en.wikipedia.org/wiki/Portable_Game_Notation">the PGN format</a>. Basically, this format lets you
+    store games in plain text files, and is implemented by many chess softwares. Your game collection is likely to already be expressed in PGN - and if not,
+    then you'll probably have no problem converting it.
+    </p>
+    
+    <p>
+    Updating the configuration files is a bit tricky (sorry about that). First, make sure the launcher is not open (you cannot change the configuration of a running launcher).
+    Move on by opening the <span class="highlight">luchess-web-client-1.0.0.war</span> using a zip utility (like <a href="http://www.7-zip.org/">7-zip</a>).
+    While the ".jar" extension is usually associated to the Java Launcher, the ".war" extension should already be bound to your zip utility (if not:
+    simply right-click the file and choose "Open With").
+    </p>
+    
+    <img src="resources/images/war-archive.png" alt="Opening the war file" />
+    
+    <p>
+    Inside your zip utility, navigate to and open the file <span class="highlight">WEB-INF\classes\luchess-app.properties</span>. You'll see a bunch of properties, which
+    contain the configuration for the Luchess application. You need to update the following properties: <span class="highlight">luchess.configuration.directory.type</span> 
+    (choose "fs" for filesystem) and <span class="highlight">luchess.configuration.directory.target.path</span> (input the full path of the directory where you want the index to be stored), then save the file and close it.
+    Proceed similarly for the second configuration file, located at <span class="highlight">WEB-INF\classes\luchess-app.properties</span>, 
+    updating the path for the property <span class="highlight">luchess.configuration.directory.source.path</span>.
+    </p>
+    
+    <p>
+    In both cases, make sure that the lines you have changed do not start with a leading "#" - if they do, this means that
+    they are "commented", i.e. are just here for the sake of the documentation, but not taken into account by the program. Also, <strong>if you input some file paths on a Windows platform</strong>,
+    you need to "double" backslashes in your paths - something like "C:\Users\foo" should be written "C:\\Users\\foo".
+    </p>
+    
+    <p>
+    Once you're done, close the archive - your zip utility should warn you that files have been modified, just accept and save it (that's the very purpose of the configuration).
+    Run the launcher then start the server, and you should be back in business.
+    </p>
+    
+    <p><em>Examples:</em></p>
+    
+    <div>
+        <img src="resources/images/luchess-app-config.png" alt="Luchess-app configuration" />
+        <img src="resources/images/luchess-web-config.png" alt="Luchess-web configuration" />
+    </div>
+    
+    <h3 id="installation-deploy">Deploying on your own Java web server</h3>
+    
+    <p>
+    The Luchess launcher is not the only way to install Luchess.
+    Luchess is a Java web application. Therefore, if you already have a Java web container installed, then simply deploy the 
+    <span class="highlight">luchess-web-client-1.0.0.war</span> in it, respecting its deployment rules. With a standard <a href="http://tomcat.apache.org/">Tomcat 8</a> server,
+    just drop the file in the <span class="highlight">webapps</span> directory, check the status of the application as well
+    as its path (for instance with <a href="http://localhost:8080/manager/html">http://localhost:8080/manager/html</a>),
+    then navigate to the application (by default something like <a href="http://localhost:8080/luchess-web-client-1.0.0/">http://localhost:8080/luchess-web-client-1.0.0/</a>).
+    </p>
+    
+    <p>
+    You may also build the archive yourself, with <a href="">Gradle</a>, using the <span class="highlight">build.gradle</span> script provided at the root hierarchy
+    of the Luchess projects. Navigate to the root directory, then run <span class="highlight">gradle build</span> - the archive for the
+    web application shall be generated in <span class="highlight">projects/luchess-web-client/build/libs</span>.
+    </p>
+    
+    <h2 id="indexing">Indexing Games</h2>
+    
+    <p>
+    When you want to find specific content in a book, you have two options: either your read the book until you find what you want, or you use the index of the book,
+    usually located at the end of the book, searching for key words related to what you're looking for. Obviously, the index is the fastest way! As we want to find games quickly, we
+    will generate an index for all our games (our so-called "corpus of games"), and use this index under-the-hood to let you find games easily.
+    </p>
+    
+    <p>
+    The index only needs to be generated (refreshed) each time you add a game to your corpus. To do so, just navigate to the index page and click the
+    <span class="highlight">index</span> button. That's all!
+    </p>
+    
+    <img src="resources/images/indexing.png" alt="Indexing games" />
+    
+    <p>
+    Now, there are still a few things you should be aware of:
+    </p>
+    <ul>
+    <li><strong>The indexing mode.</strong> There are two indexing modes: the default mode <span class="highlight">CREATE</span>, in which we erase and rebuild the whole index each time we run an indexing
+    process, and the mode <span class="highlight">UPDATE</span> in which we simply update the index with new games. You can switch between these modes in the configuration
+    file <span class="highlight">WEB-INF\classes\luchess-app.properties</span>,
+    adjusting the value of the property <span class="highlight">luchess.configuration.directory.mode</span>.</li>
+    <li><strong>The performance of indexing.</strong> Indexing may take time. The amount of memory, the number and speed of CPU, the types of disks (SSD),
+    are factors that may considerably increase the speed of indexing.</li>
+    <li><strong>The size of the index.</strong> You need to make sure that the available disk space for the index is more than 11.1 times the size of the games directory.
+    The final index will not use all of it (expect about 3.7 times the size of the games directory), but the indexing process surely will, 
+    as it not only needs temporary files, but also keeps a snapshot of the old index for users searching games during the indexing period.
+    </li>
+    <li><strong>The protection of the index.</strong> If you like, you may protect the indexing process with a password, thanks to the property 
+    <span class="highlight">luchess.configuration.indexing.password</span> in the <span class="highlight">WEB-INF\classes\luchess-web.properties</span>
+    configuration file. If you do so, users will have to enter the password when trying to run an indexing process.
+    </ul>
+    
+    <h2 id="searching">Searching Games</h2>
+    
+    <h3 id="searching-criteria">Specifying search criteria</h3>
+    
+    Once you have indexed some games, you may start and search them. The possible search criteria are few, yet powerful:
+    <ul>
+    <li><strong>Sequences of opening moves.</strong> You must input sequences of starting moves, either moving pieces on the board
+    (click on the start square then on the end square to move a piece) or entering move values
+    in their PGN format. Games matching these sequences shall be returned when you run the search. Note that you do
+    not match game positions, but really sequences of opening moves.</li>
+    <li><strong>Players' names.</strong> Simply enter the name of a player, and all games having players with a similar name shall be returned.
+    If you want to search for an exact name, enclose your searched name within double quotes. If you want to search for many names, separate the names by a comma.</li>
+    <li><strong>Players' ranking (elo).</strong> In chess, the strength of a player is reported as a ranking figure, called "elo". Possible values
+    range from zero to about 2,800, with the grand master level being set at 2,500, and top players level sometimes going beyond 3,000. Simply enter
+    the minimum required elo, if you want one.</li>
+    <li><strong>Paging</strong>. Your search query may return thousands of games, with which we do not want to burden you. Therefore you can use paging to decide
+    how many games you want to return for each search: each search yields a "book" of results, each page of the book having a certain number of games.
+    By default, we show you about 10 games per page, starting at page 1.</li>
+    </ul>
+    
+    <p>Of course, not only are these criteria optional, but you may also combine them together at will.</p>
+    
+    <img src="resources/images/searching-criteria.png" alt="Searching with criteria" />
+    
+    <h3 id="searching-results">Understanding the results</h3>
+    
+    <p>
+    The results of your search shall be displayed right below the board:
+    <ul>
+    <li><strong>Result header.</strong> This header shows the number of games found, the time it took to find them all,
+    as well as the percentage of games won by white, by black, drawn or unfinished games.</li>
+    <li><strong>List of games.</strong> Contains a page of games matching the search criteria, as well as options to either load the game in the current view, or
+    download the game on your disk.</li>
+    <li><strong>Continuations.</strong> Continuations are list of moves which come next in your library of games. This means that given a certain opening,
+    you'll see what are the possible continuations and how well they fare. You may even click on them to automatically explore the continuation.
+    </li>
+    </ul>
+    </p>
+    
+    <img src="resources/images/searching-results.png" alt="Understanding the results" />
+    
+    <p>
+    A few notes about the results:
+    <ul>
+    <li>The games are <strong>slightly sorted</strong>. Firstly, if you have entered two players' names in your criteria, then games played
+    by these two players will be shown before games played by only one of the two players. Secondly, games with higher elo ranking are favored, because
+    we believe that these are likely to be of more interest than lower-level games.
+    </li>
+    <li>Continuations are <strong>calculated dynamically</strong>, and probably amount for more than 90% of the
+    query execution time. The depth of calculations (i.e. until which move they are calculated) can be specified in the configuration files.</li>
+    <li><strong>Technical caches</strong> are populated at each first query of a given type. This means that first queries will always be slower (and sometimes significantly slower)
+    than next queries, as they also serve as warm-up for the index.</li>
+    </ul>
+    </p>
+    
+    <h3 id="searching-studying">Studying a game</h3>
+    
+    <p>As briefly explained in the previous section, you have the option of getting the content of a game:
+    <ul>
+    <li><strong>By downloading it.</strong> The game will be sent back by the server as an attachment, in the PGN format. You may then load it in your favorite
+    chess editor.</li>
+    <li><strong>By loading it.</strong> The game moves will be automatically entered in the "moves" section, and you will be able to navigate it, either use the navigation bar,
+    or the directional keys of your keyboard (after selecting the current move).</li>
+    </ul>
+    </p>
+    
+    <img src="resources/images/searching-moves.png" alt="Navigating moves" />
+    
+    <p>
+    That's all! Thanks for reading. I hope that you enjoy Luchess, and find it useful in your daily chess life.
+    </p>
+</div>
+</body>
+</html>

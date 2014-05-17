@@ -1,0 +1,24 @@
+#indexLast {
+    margin-top: 10px !important;
+}
+
+#indexLast ul {
+    margin: 0;
+}
+
+#indexLast .text>:first-child {
+    width: 150px;
+}
+
+.indexingPasswordHandler {
+    color: #C4A570;
+    cursor: pointer;
+    display: inline-block;
+    margin-top: 5px;
+    text-decoration: underline;   
+}
+
+.textHighlight {
+    color: #C4A570;
+    font-weight: 700;
+}

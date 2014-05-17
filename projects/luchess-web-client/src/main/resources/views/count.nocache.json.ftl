@@ -1,0 +1,3 @@
+{
+    numGames: "${numGames}"
+}

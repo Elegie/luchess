@@ -1,0 +1,204 @@
+.float-separator {
+    clear: both;
+}
+
+/**
+* Board Styles
+*/
+
+#board {
+    border-spacing: 0;
+    float: left;
+}
+
+#board th {
+    color: #222;
+    font-weight: bold;
+    padding: 8px;
+}
+
+#board td {
+    border: 2px solid transparent;
+    width: 46px;
+    height: 46px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+#board.highlight td:hover {
+    border: 2px solid yellow;
+}
+
+#board td.highlight {
+    border: 2px solid #0c0;
+}
+
+#board td img {
+    width: 41px;
+}
+
+#board tr:nth-child(odd) td:nth-child(odd),
+#board tr:nth-child(even) td:nth-child(even) {
+    background: #C4A570 url(../images/board/wood-dark.jpg);
+}
+
+#board tr:nth-child(odd) td:nth-child(even),
+#board tr:nth-child(even) td:nth-child(odd) {
+    background: #F7F6CB url(../images/board/wood-light.jpg); 
+}
+
+.popinPromotion {
+    background-color: #F7F6CB;
+    border: 2px outset #C4A570;
+}
+
+.popinPromotion img {
+    height: 30px;
+    width: 30px;
+}
+
+.popinPromotion span:hover {
+    background-color: #C4A570;
+    display: inline-block;
+}
+
+/**
+* Criteria Styles
+*/
+
+.search-col {
+    float: left;
+    margin-left: 20px;
+}
+
+.search-col legend, .search-col fieldset {
+    padding-top: 0;
+}
+
+.search-col fieldset {
+    margin-bottom: 10px;
+}
+
+.search-col input[type=text] {
+    margin: 2px 0;
+    text-align: center;
+}
+
+.search-col input[type=submit], .search-col input[type=button] {
+    margin: 0;
+}
+
+
+label[for=name], label[for=elo] {
+    width: 50px;
+}
+
+#name, #elo {
+    width: 130px;
+}
+
+label[for=pageStart], label[for=pageCount] {
+    width: 130px;
+}
+
+#pageStart, #pageCount {
+    width: 50px;
+}
+
+#moves ol {
+    height: 346px;
+    width: 150px;
+    overflow: auto;
+    padding-left: 3em;
+    margin: 0;
+}
+
+#moves input[type=text] {
+    width: 60px;
+}
+
+.movesNav {
+    text-align: center;
+}
+
+.movesNav input[type=text] {
+    width: 60px;
+}
+
+.movesNav input[type=submit], .movesNav input[type=button] {
+    background-color: #C4A570;
+    color: #F5F4DF;
+    width: 30px;
+}
+
+/**
+* Stat Styles
+*/
+
+.stat {
+    border: 1px dotted #000;
+    display: inline-block;
+    font-size: 0.9em;
+    margin: 0 5px;
+    width: 200px;
+}
+
+.stat span {
+    display: inline-block;
+    text-align: center;
+    width: 50px;
+}
+
+.stat span:nth-child(1) {
+    background-color: #fff;
+    color: #000;
+}
+
+.stat span:nth-child(2) {
+    background-color: #bbb;
+    color: #000;
+}
+
+.stat span:nth-child(3) {
+    background-color: #000;
+    color: #fff;
+}
+.stat span:nth-child(4) {
+    background-image: repeating-linear-gradient(-45deg, #ddd, #ddd 1px, #fff 2px, #fff 5px);
+    color: #000;
+}
+
+/**
+* Games / Continuations Styles
+*/
+
+#games, #continuations {
+    float: left;
+    border: 1px solid #7A4B00;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+#continuations {
+    margin-left: 20px;
+}
+
+#games img {
+    width: 1.1em;
+}
+
+#games th, #continuations th {
+    border-bottom: 1px solid #7A4B00;
+    color: #7A4B00;
+    text-align: center;
+}
+
+#games td, #continuations td {
+    line-height: 1.1em;
+    padding: 2px;
+    text-align: center;
+}
+
+.highlightContinuations td:first-child:hover {
+    cursor: pointer;
+}

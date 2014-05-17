@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- property scope="context" name="filterLogger" value="io.elegie" /-->
+    <property scope="context" name="nopexPattern" value="%date{HH:mm:ss,SSS} %-5level %logger{36} - %message%n%nopex" />
+    <property scope="context" name="stacktracePattern" value="%throwable{2}" />
+
+    <appender name="nopex-console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${nopexPattern}</pattern>
+        </encoder>
+    </appender>
+    
+    <appender name="stacktrace-console" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>error</level>
+        </filter>    
+        <encoder>
+            <pattern>${stacktracePattern}</pattern>
+        </encoder>
+    </appender>
+    
+    <root level="INFO">
+        <appender-ref ref="nopex-console" />
+        <appender-ref ref="stacktrace-console" />
+    </root>
+</configuration>

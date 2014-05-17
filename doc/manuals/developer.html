@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Developer Guide</title>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="resources/styles/screen.css"/>
+    <link rel="stylesheet" type="text/css" media="print" href="resources/styles/print.css"/>
+    <link rel="shortcut icon" href="images/favicon.ico"/>
+    <script type="text/javascript" src="resources/scripts/dom.js"></script>
+    <script type="text/javascript" src="resources/scripts/summary.js"></script>
+</head>
+<body>
+<div id="content">
+    <h1 id="developer-guide">Developer Guide</h1>
+    
+    <h2 id="about">About</h2>
+    
+    <p>
+    This guide is intended for you developers, who have read the <a href="user.html">user guide</a>
+     and now wish to study the inner structure of Luchess, either to re-use some part(s)
+    of it for your own projects, or simply to gain more insight on how the application works. You should however be made aware of the following two assumptions:
+    </p>
+    <ul>
+    <li>The technologies, tools and libraries used in the project are <strong>fairly standard</strong>, and so are the architectural patterns. As such, I expect you to either
+    be familiar with those, or resourceful enough to search the web when in lack of technical knowledge in certain areas.</li>
+    <li>The guide will mostly <strong>document the intent behind designs</strong>, rather than the details of implementations (except when those are interesting or tricky).
+    It aims at helping you find your way through the code, and not explain the code itself. As a matter of fact, you'll find out soon enough
+    that the code is easy to grasp, as I worked extensively with <a href="http://www.sonarqube.org/">Sonar</a>, paying high attention to quality factors such as
+    design, complexity and readability.
+    </li>
+    </ul>
+    
+    <p>Enjoy your trip!</p>
+    
+    <h2 id="technical-environment">Technical environment</h2>
+    
+    <p>During the development of Luchess, I have used many tools, of different versions. What follows is a stable system of technologies,
+    with the versions I last used - most pretty recent, but not necessarily the latest ones, for compatibility reasons. Also, I usually work on
+    a Windows 8.1 64-bit platform.</p>
+    
+    <h3 id="software-factory">Software factory</h3>
+    
+    <p>
+    These are the technologies you need to manually install to ready your development environment. Some of them may be provided with installers, others only need
+    unzipping and adding path variables.
+    </p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Techology</th>
+                <th>Version</th>
+                <th>Comments</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><a href="http://www.gradle.org/">Java SDK</a></td>
+                <td>7</td>
+                <td>
+                    You need a Java 7 SE Development Kit for Luchess. I've used multi-catch blocks, try-with-resources constructs and a bit of the Paths API. I've however
+                    stuck to previous reflection and concurrency APIs.
+                </td>
+            </tr>
+            <tr>
+                <td><a href="https://www.eclipse.org/">Eclipse</a></td>
+                <td>Juno SR-2, Build 20130225-0426</td>
+                <td>
+                    Make sure to properly reference your JDK 7 in Eclipse, using <span class="highlight">Windows/Preferences/Java/Installed JREs</span>.
+                Also, I have several plugins installed, although I'm not sure whether the names / versions displayed
+                below are the correct ones (but at least, you get some idea):
+                <ul>
+                    <li><a href="http://www.eclemma.org/">EclEmma Java Code Coverage</a>, v2.3.0.201403192240. To get coverage information
+                    when running the tests.</li>
+                    <li><a href="https://developers.google.com/java-dev-tools/codepro/doc/">CodePro Analytix</a>, 7.1.0.r37x201109091123. To get feedback on quality, when doing static analysis in Eclipse.
+                    Certain Java 7 constructs are not compatible though.</li>
+                    <li><a href="http://findbugs.sourceforge.net/">FindBugs</a>, 2.0.3.20131122-15027. To get feedback on potential bugs.</li>
+                    <li><a href="http://www.gradle.org/">Gradle</a> IDE, 3.5.0.201404011446-RELEASE. To properly import all projects / dependencies in Eclipse.
+                    I believe that it may now be natively bundled, like JUnit.
+                    </li>
+                </ul>
+                </td>
+            </tr>
+            <tr>
+                <td><a href="http://www.gradle.org/">Gradle</a></td>
+                <td>1.11</td>
+                <td>
+                    The build of Luchess is taken care of by Gradle. Available Gradle plugins and properties change regularly,
+                    so be prudent when you decide to upgrade.
+                    <br /><br />
+                    <strong>Note</strong>: if you use a Java version inferior to 8 (as per my recommendations), then
+                    add a <span class="highlight">GRADLE_OPTS</span> environment variable to the path,
+                    with its value set to <span class="highlight">"-XX:MaxPermSize=512m"</span>.
+                </td>
+            </tr>
+            <tr>
+                <td><a href="http://www.sonarqube.org/">Sonar</a></td>
+                <td>4.2</td>
+                <td>
+                    Sonar provides quality measures, and is directly integrated to Gradle (although configurations have changed over time).
+                    As of now, it does not work well with Java 8, so stick to Java 7. I run analyses using the "Sonar way with FindBugs" quality profile,
+                    with Jacoco for code coverage. I have also installed the following Sonar plugins:
+                <ul>
+                    <li>Checkstyle 2.1</li>
+                    <li>PMD 2.1</li>
+                    <li>Useless Code Tracker</li>
+                </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h3 id="libraries-dev">Development libraries</h3>
+    
+    <p>These libraries are used for development, mainly for testing. You do not have to install them, as they are referenced in the
+    Gradle build script. However, make sure to import your project in Eclipse using the Gradle
+    import option, so that all dependencies be properly resolved.</p>
+    
+    <p>
+    <strong>Note</strong>: I believe that you will need to build the Gradle main project once, before importing the projects,
+    possibly because of <a href="http://issues.gradle.org/browse/GRADLE-1766">#1766</a>.
+    </p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Technology</th>
+                <th>Version</th>
+                <th>Comments</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><a href="http://junit.org/">JUnit</a></td>
+                <td>4.11</td>
+                <td>
+                    All tests are written with JUnit. I'm used to running them in the IDE (using the coverage plugin), and each Gradle build runs all of them as well.
+                    It takes about 10s to run all 500+ tests on my machine. 
+                </td>
+            </tr>
+            <tr>
+                <td><a href="https://code.google.com/p/mockito/">Mockito</a></td>
+                <td>1.9.5</td>
+                <td>
+                    I use Mockito to test the web framework, to mock servlet-related objects. 
+                </td>
+            </tr>
+            <tr>
+                <td><a href="https://code.google.com/p/fest/">FEST</a></td>
+                <td>1.2.1</td>
+                <td>
+                    I use FEST to test the Swing UI of the launcher. Be careful though: it is based on a robot, which moves the mouse to click on the buttons of the view.
+                    If you move the mouse during the tests, bring other windows up, or more generally if some other graphical software interferes by drawing
+                    something during the tests, then the tests will fail.
+                    Just <a href="http://junit.sourceforge.net/javadoc/org/junit/Ignore.html">@ignore</a> them if this is a bother.
+                </td>
+            </tr>
+            <tr>
+                <td><a href="http://www.eclipse.org/jetty/">Jetty</a></td>
+                <td>9.1.3.v20140225</td>
+                <td>
+                    I use Jetty to start a web server and load the application in a few seconds, using the Jetty gradle plugin. I have also embedded a Jetty server
+                    in the launcher (see the launcher section below). In both cases, servers are configured to listen by default on port <span class="highlight">9001</span>.
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <p>
+    <strong>Note</strong>: so far, I have written UI tests only for the Swing launcher, and not for the web client. I may write some later, or not. If that were the case, then
+    I'd need some additional tool (such as <a href="http://docs.seleniumhq.org/">Selenium</a>).
+    </p>
+    
+    <h3 id="libraries-run">Runtime libraries</h3>
+    
+    <p>These libraries are bundled in the final archives. Again, you do not have anything to do with it, the Gradle script will take care of it.</p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Technology</th>
+                <th>Version</th>
+                <th>Comments</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><a href="http://lucene.apache.org/core/">Lucene</a></td>
+                <td>4.7</td>
+                <td>
+                    Searching the chess games is made with Lucene, with the following libraries:
+                    <ul>
+                        <li>lucene-core</li>
+                        <li>lucene-analyzers-common</li>
+                        <li>lucene-queries</li>
+                        <li>lucene-queryparser</li>
+                    </ul> 
+                </td>
+            </tr>
+            <tr>
+                <td><a href="http://freemarker.org/">Freemarker</a></td>
+                <td>2.3.20</td>
+                <td>
+                    I chose Freemarker as the main rendering technology for the web pages.
+                    Other technologies (such as JSP, Velocity...) could later be added relatively easily to the web framework.
+                </td>
+            </tr>
+            <tr>
+                <td><a href="http://jchardet.sourceforge.net/">JCharDet</a></td>
+                <td>1.0</td>
+                <td>
+                    This library is used to guess the charset of a file. I use it to import PGN files with the right charset, in order to avoid strange characters
+                    in the name of players. 
+                </td>
+            </tr>
+            <tr>
+                <td><a href="https://jcp.org/en/jsr/detail?id=340">Servlet</a></td>
+                <td>2.5</td>
+                <td>
+                    The servlet API is needed at compile time, but is not included in the final archive, as an implementation should already be provided by the web server.
+                </td>
+            </tr>
+            <tr>
+                <td><a href="http://www.slf4j.org/">SLF4J</a></td>
+                <td>1.7.6</td>
+                <td>
+                    All logs of the application are written with the SLF4J objects. By default, the Luchess application is bundled with the
+                    Logback implementation, but one could mark the implementation as provided by the runtime environment, or even
+                    substitute another implementation in the build script, without having to change the
+                    code (as intended by the SLF4J philosophy).
+                </td>
+            </tr>
+            <tr>
+                <td><a href="http://logback.qos.ch/">Logback</a></td>
+                <td>1.1.1</td>
+                <td>
+                This is the logging implementation used in the build script.
+                <br /><br />                
+                <strong>Note</strong>: the launcher does reference the library directly, as I wanted to write a custom
+                appender. Most of the time though, you will deploy the web application
+                directly on your web server, never using the launcher, intended for casual users with no web server on their computer.
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h3 id="useful-commands">Useful commands</h3>
+    
+    <p>These are the commands I use in my daily development process (git commands not shown).</p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Command</th>
+                <th>Usage</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <span class="highlight">cd "D:\Sonar\sonarqube-4.2\bin\windows-x86-64"</span>
+                    <br />...then... <br />
+                    <span class="highlight">StartSonar</span>
+                </td>
+                <td>
+                    Navigate to the sonar scripts directory for your platform, then start the sonar server.
+                    I have kept the default settings (local database, port 9000).
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="highlight">cd "E:\Programmation\Luchess"</span>
+                </td>
+                <td>
+                    Navigate to the project directory, which contains the <span class="highlight">build.gradle</span> script.
+                    <br /> <br />
+                    <strong>Note</strong>: All gradle commands below must be executed from this location.
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="highlight">gradle luchess-web-client:jettyRun</span>
+                </td>
+                <td>
+                    Build the application, start a Jetty web server, and deploy the application on it. After this, you can navigate to Luchess in your favorite browser.
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="highlight">gradle luchess-web-client:jettyRunWar</span>
+                </td>
+                <td>
+                    Same as the precedent, except that it builds and deploys a war file
+                    (located in <span class="highlight">projects\luchess-web-client\build\libs</span>).
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="highlight">gradle build</span>
+                </td>
+                <td>
+                    Build the application, i.e. all its sub-projects. Archives for each subproject are generated in
+                    <span class="highlight">projects\luchess-xxx\build\libs</span>. 
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="highlight">gradle test</span>
+                </td>
+                <td>
+                    Run all tests. Do not move your mouse or bring windows up when running the tests, or else the
+                    Swing robot used to test the launcher will fail.
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="highlight">gradle doc</span>
+                </td>
+                <td>
+                    Generate the javadoc for all subprojects. The javadoc is stored at
+                    <span class="highlight">doc\javadoc</span>.
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="highlight">gradle sonarRunner</span>
+                </td>
+                <td>
+                    Starts a Sonar analysis. The sonar server must be started before you run this command.
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="highlight">gradle backup</span>
+                </td>
+                <td>
+                    Builds an archive of source and doc files, and store it in the <span class="highlight">/backup</span> directory.
+                    If you use a version control system, such as <a href="http://git-scm.com/">Git</a>, then you will not use this command.
+                    I simply wanted to keep elsewhere small archives of essential files.
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h3 id="quality">Current quality</h3>
+    
+    <p>
+    So far, I lack real usage data for the application, so cannot tell from experience whether it is robust and efficient. It probably has bugs, too.
+    However, I have tried my best to build a high quality program, using static analysis extensively. What follows is the current state of the application,
+    as analyzed by Sonar and its related plugins.
+    </p>
+    
+    <img src="resources/images/sonar.png" alt="Quality with Sonar" style="width:90%" />
+    
+    <p>The technical debt, which I currently find acceptable, is as follows:</p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Severity</th>
+                <th>Comments</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="highlight-soft">Multithreaded correctness - Method calls Thread.sleep() with a lock held (1)</span></td>
+                <td><span class="critical">Critical</span></td>
+                <td>I deliberately use a sleep() method while holding a lock. This lock is held at most for a few seconds,
+                and it has to do with the indexing process (which should occur very rarely).</td>
+            </tr>
+            <tr>
+                <td><span class="highlight-soft">Insufficient branch coverage by unit tests (16)</span></td>
+                <td><span class="major">Major</span></td>
+                <td>Either because of uncovered branches or non-tested toString() methods. Uncovered branches have been manually tested and left as is,
+                as they're usually related to exception management.</td>
+            </tr>
+            <tr>
+                <td><span class="highlight-soft">Public methods should throw at most one checked exception (13)</span></td>
+                <td><span class="major">Major</span></td>
+                <td>One interface (Token) has a method that declares two possible exceptions: an IOException when some stream
+                is unavailable, and a ParseException when there is a domain problem. As these are different in nature, I have chosen to keep them separate.</td>
+            </tr>
+            <tr>
+                <td><span class="highlight-soft">Generic wildcard types should not be used in return parameters (5)</span></td>
+                <td><span class="major">Major</span></td>
+                <td>The Luchess MVC web framework lets any POJO be a controller, provided it has one method annotated
+                with a <span class="highlight">@Controller</span> annotation. The POJO does not need to implement any interface, which later gives this issue
+                when working with reflection. This is a design that I like, so I have kept it.</td>
+            </tr>
+            <tr>
+                <td><span class="highlight-soft">Methods should not be too complex (3)</span></td>
+                <td><span class="major">Major</span></td>
+                <td>Three methods which have complexity of 11, 13 and 14, superior to the 10 authorized threshold. In my opinion, they remain perfectly
+                readable as they are, so I have not changed anything.</td>
+            </tr>
+            <tr>
+                <td><span class="highlight-soft">Exception handlers should provide some context and preserve the original exception (2)</span></td>
+                <td><span class="major">Major</span></td>
+                <td>The caught exceptions are not lost, but rather delegated to another class, which the static analysis misses.</td>
+            </tr>
+            <tr>
+                <td><span class="highlight-soft">Bad practice - Method ignores exceptional return value (1)</span></td>
+                <td><span class="major">Major</span></td>
+                <td>As a matter of fact, it does not, but this is hard to get because the return value is checked in an external hook for the method
+                (lifecycle of an executor service).</td>
+            </tr>
+            <tr>
+                <td><span class="highlight-soft">Expressions should not be too complex (1)</span></td>
+                <td><span class="major">Major</span></td>
+                <td>A big boolean expression, which I made readable and want to keep as is.</td>
+            </tr>
+            <tr>
+                <td><span class="highlight-soft">The members of an interface declaration or class should appear in a pre-defined order (8)</span></td>
+                <td><span class="minor">Minor</span></td>
+                <td>In some classes, I have separated logical content into sections, and relocated some member declarations here and there, as
+                I believe it improves the readibility. This might indicate a violation of the Single
+                Responsibility Principle, but I like the cohesion that results from this design, so I've eventually stuck to it.</td>
+            </tr>
+            <tr>
+                <td><span class="highlight-soft">Control flow statements "if", "for", "while", "switch" and "try" should not be nested too deeply (3)</span></td>
+                <td><span class="minor">Minor</span></td>
+                <td>As long as the flow remains readable, I'm fine with it.</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h2 id="architecture">Software architecture</h2>
+    
+    <h3 id="architecture-overview">Overview</h3>
+    
+    <p>The following graph shows how Luchess projects articulate together:</p>
+    <ul>
+        <li>The <strong>luchess-pgn</strong> module is a custom-made PGN parser. It could be re-used by any chess software needing a PGN parser,
+        provided its limitations are understood and accepted.</li>
+        <li>The <strong>luchess-core</strong> module defines all services API (such as index and search),
+        and provides domain objects and algorithms which can be freely used by implementations.</li>
+        <li>The <strong>luchess-app-lucene4x</strong> module provides a Lucene 4.7 implementation for all services API.</li>
+        <li>The <strong>luchess-web-framework</strong> module is a custom-made lightweight MVC web framework,
+        which could be re-used by any Java web app needing a simple web framework.</li>
+        <li>The <strong>luchess-web-client</strong> module is the web app itself. It uses the core services API, currently being injected the lucene4x implementation
+        (but other conforming implementations, such as SQL-based ones, could be as easily injected).
+        It works its flow logic around contexts and controllers respecting the contracts of the Luchess web framework.</li>
+        <li>The <strong>luchess-launcher</strong> module is a standalone web app launcher built around Jetty.
+        It can be used to launch any standard Java web app, and not only the Luchess web client.</li>
+    </ul>
+    
+    <img src="resources/images/overview.png" alt="Architecture overview" style="width: 600px" />
+    
+    <h3 id="luchess-pgn">Luchess-pgn</h3>
+    
+    <p>
+    The Luchess-pgn module is <a href="http://www6.chessclub.com/help/PGN-spec">Portable Game Notation (PGN)</a> parser. As such, it aims at 
+    <strong>reading PGN files and making games objects</strong> out of them, for further processing. Basically, see that as creating
+    a <span class="highlight">new Game()</span>, and calling setter methods while reading raw text from a PGN file.</p> 
+    
+    <p>A PGN file contains one or many
+    chess games, with their headers (players, locations, dates...), the moves played, and possibly comments, variations and appreciation marks. 
+    We call <strong>token</strong> any chess entity such as a move number, a move value, a player's name and so on.
+    Here's a simple
+    example:
+    </p>
+    
+    <pre>
+	[Event "F/S Return Match"]
+	[Site "Belgrade, Serbia Yugoslavia|JUG"]
+	[Date "1992.11.04"]
+	[Round "29"]
+	[White "Fischer, Robert J."]
+	[Black "Spassky, Boris V."]
+	[Result "1/2-1/2"]
+	 
+	1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 {This opening is called the Ruy Lopez.}
+	4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Nb8  10. d4 Nbd7
+	11. c4 c6 12. cxb5 axb5 13. Nc3 Bb7 14. Bg5 b4 15. Nb1 h6 16. Bh4 c5 17. dxe5
+	Nxe4 18. Bxe7 Qxe7 19. exd6 Qf6 20. Nbd2 Nxd6 21. Nc4 Nxc4 22. Bxc4 Nb6
+	23. Ne5 Rae8 24. Bxf7+ Rxf7 25. Nxf7 Rxe1+ 26. Qxe1 Kxf7 27. Qe3 Qg5 28. Qxg5
+	hxg5 29. b3 Ke6 30. a3 Kd6 31. axb4 cxb4 32. Ra5 Nd5 33. f3 Bc8 34. Kf2 Bf5
+	35. Ra7 g6 36. Ra6+ Kc5 37. Ke1 Nf4 38. g3 Nxh3 39. Kd2 Kb5 40. Rd6 Kc5 41. Ra6
+	Nf2 42. g4 Bd3 43. Re6 1/2-1/2
+    </pre>    
+    
+    <p>The format itself is quite readable, but not easy to parse, because most tokens have many characters, and some even share the same starting characters.
+    Consider the figure "1": it can be used to indicate the first move, the 10<sup>th</sup> move,
+    a row position, a victory by White (1-0), a drawn game (1/2-1/2), and can even be used in header values or comments.
+    When iterating the text and encountering a "1", what should we do? Store some state and move on, checking the state as we go, until we recognize a token?
+     Look ahead and buffer the read
+    characters, to use them in other tokens if needed? Or not store state, but backtrack when we encounter an ambiguous character? Also, how to manage the growing complexity,
+    considering that the "1" figure is only one of many more PGN-allowed characters, and that we do not want to end up with ugly procedural spaghetti code?</p>
+    
+    <p>The constraints I have chosen to respect are the following: <strong>no state-keeping</strong>, so as to allow concurrent execution,
+    and <strong>no looking-ahead or backtracking</strong>,
+    because these are inefficient. To do so, I have applied a combination of an <a href="http://en.wikipedia.org/wiki/Interpreter_pattern">Interpreter Pattern</a>
+    and a <a href="http://en.wikipedia.org/wiki/Visitor_pattern">Visitor Pattern</a>. If you do not know about them, check them out - they're very interesting!</p>
+    
+    <p>Basically, we consider that there are a finite number of tokens, as defined in the PGN specification, and
+    that these tokens can only be articulated together in certain ways - a set of rules we call <strong>grammar</strong>. For instance, a move
+    number (like <span class="highlight">24.</span>) must be followed by a move (such as <span class="highlight">Qdxe4+</span>), and not by anything else.
+     In other words, in a given grammar,
+    each token has list of <strong>possible successors</strong>, and the grammar can be represented as a tree, with a single root node (the token that starts a game), which unfolds
+    with tokens describing the full game. What's also interesting in a grammar is that some of its nodes can be reused elsewhere,
+    making for recursive branches - providing for high reusability of grammar parts, in exchange of increased complexity.</p>
+    
+    <img src="resources/images/grammar-example.png" alt="Example of a grammar" />
+    
+    <p>Now, how do we use a grammar? The idea is to have a parser (i.e. a <strong>client</strong>) load
+    a grammar, and feed it a reader to the PGN source. A token in the grammar may accept a given reader, provided the current
+    character of the reader matches the start of the entity representation of the token.
+    If the token accepts the reader, then it may consumes as much as needed from it, until the full entity has been <strong>interpreted</strong>. If it does not accept it,
+    then it leaves the reader untouched, and the parser moves on to the next token. The parsing is done either when a terminal token
+    is reached, or when no successor accepts the incoming character (meaning a parse exception). The algorithm is actually pretty straightforward:</p>
+    
+    <img src="resources/images/digest.png" class="code" alt="Digestion" />
+    
+    <p>Note that the parser is provided with a <strong>visitor</strong> which contains the logic of what to do with the matched entities, for instance build a game object
+    or a move object. Each time a token has finished interpreting an entity, it notifies the visitor of its success, passing the interpreted value of the entity. 
+    This lets us keep the parsing logic decoupled from the building logic, also resulting in the parser being usable in other applications than Luchess.</p>
+    
+    <h3 id="luchess-core">Luchess-core</h3>
+    
+    <p>The Luchess-core module defines the APIs of all Luchess services, which must be respected by all conforming implementations. It also provides
+    various domain helpers, such as chess objects and algorithms, which implementations can rely upon when working out their logic.
+    Here's a brief overview of the module.</p>
+    
+    <img src="resources/images/luchess-core.png"  alt="Luchess core" style="width: 700px" />
+    
+    <p>Let us start with the API. It simply defines a skeleton of services, the implementation of which is to be provided by consumers of the core framework.
+    The single entry point for services is the <span class="highlight">ServicesFactory</span>, which gives access to all services. This means that the
+    Luchess Web Client is actually decoupled from the Lucene-based implementation of the services: it is injected with an implementation of the factory,
+    and simply relies on the API to navigate and use services. As such, one could perfectly write a SQL-based implementation of the services
+    (a concurrent to our Lucene-based implementation!), and inject
+    it in the client without having to change any part of the client code, simply by specifying the class name of the factory in a property file.</p>
+    
+    <p>The indexing service definition permits concurrent implementations of indexing, and users of the framework are encouraged to check out and re-use the
+    provided indexing framework if they want to walk that path. As for the exploring service, it leverages the
+    <a href="http://en.wikipedia.org/wiki/Command_pattern">Command Pattern</a>, which makes the addition of new search queries a relatively easy task. Finally, the info service
+    is a mere getter for the number of games in the index.</p>
+    
+    <p>Note that the module provides an <span class="highlight">AbstractServicesIntegrationTest</span>, which implementations can extend, to make sure that their
+    services implementation respect all contracts of the API (this should not prevent them from writing their own tests, though!).</p>
+    
+    <p>Now that we have presented the API, let us move on to domain helpers. The module provides a full set of objects related to chess, which lets up model
+    algorithms elegantly. Chess players will find familiar concepts here: board, position, color, figurine, piece, and so on. Services may refer to such objects,
+    as regular data transfer objects. In addition to these objects, domain algorithms regarding mvoes are also provided: these should help assert whether certain moves
+    can be performed in given positions, which can be useful for clients which want to validate moves to be searched prior to the actual search.</p>
+    
+    <p>The last part of the module is the indexing framework. This framework is built around an <span class="highlight">IndexingSession</span>,
+    an object that lets you run concurrent indexing process on your index (provided your underlying index supports concurrent writing). Running the session is as simple
+    as creating the object, setting its properties, and running it in a new thread. Here's how the Lucene-based implementation of the builder service does it:</p>
+    
+    <img src="resources/images/indexing-session.png" class="code" alt="Indexing Session" />
+    
+    <h3 id="luchess-app-lucene4x">Luchess-app-lucene4x</h3>
+    
+    <p>The Luchess-app-lucene4x provides an implementation for the services defined in the Luchess-core module. This implementation is currently based on
+    <a href="http://lucene.apache.org/core/">Lucene</a> 4.7. The architecture of the module is as follows:</p>
+    
+    <img src="resources/images/luchess-lucene4x.png"  alt="Luchess lucene4x" style="width: 500px" />
+    
+    <p>We work on the base of a one-to-one mapping between a chess game and a Lucene document, each property of the game being mapped
+    to a field of the Lucene document. The types of fields and analyzers used differ from field to field.</p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Property</th>
+                <th>Field Type</th>
+                <th>Analyzer</th>
+                <th>Comments</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>id</td>
+                <td>Stored TextField</td>
+                <td>KeywordAnalyzer</td>
+                <td>Each game has a unique generated ID, so that one can find a specific game easily (for example for download purposes).</td>
+            </tr>
+            <tr>
+                <td>Black</td>
+                <td>Stored TextField</td>
+                <td>SimpleAnalyzer</td>
+                <td>The name of the black player. This field may contain many names, which should be separated by a character recognized by the analyzer.</td>
+            </tr>
+            <tr>
+                <td>White</td>
+                <td>Stored TextField</td>
+                <td>SimpleAnalyzer</td>
+                <td>See above.</td>
+            </tr>
+            <tr>
+                <td>BlackElo</td>
+                <td>Stored IntField</td>
+                <td>-</td>
+                <td>The elo value for the black player. The field is not created if there's no positive integer available.</td>
+            </tr>
+            <tr>
+                <td>WhiteElo</td>
+                <td>Stored IntField</td>
+                <td>-</td>
+                <td>See above.</td>
+            </tr>
+            <tr>
+                <td>Result</td>
+                <td>Stored IntField</td>
+                <td>-</td>
+                <td>An int value representing the result of the game:
+                1 for a white victory, 0 for a drawn game, -1 for a black victory, -2<sup>31</sup> for an unfinished game.</td>
+            </tr>
+            <tr>
+                <td>MoveText</td>
+                <td>Stored TextField</td>
+                <td>MoveTextAnalyzer</td>
+                <td>A move text contains all moves for the game. A custom analyzer is used, so as to allow for efficient opening search.</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <p>The purpose of the module is to index games, then create and execute Lucene queries, mostly creating query objects, combining them
+    together within boolean queries, and feeding them to some index searcher.
+    Let us however have a look at queries about game moves, which has required implementing
+    many standard Lucene extension points.</p> 
+    
+    
+    <p>At the beginning comes the raw text to be indexed. It contains a list of moves, expressed in the PGN format,
+    separated by a space, such as <span class="highlight">e4 c5 Nf3 d6 d4</span>. Our <span class="highlight">MoveTextAnalyzer</span> 
+    generates tokens with the following two rules:
+    </p>
+    <ul>
+        <li><strong>Move-Gramming</strong> (forgive the neologism). We start by generating an empty token, named <span class="highlight">move zero</span>. We then generate tokens accumulating
+         all moves 
+        from the start, up to the current tokenized move index. Therefore, the first token after move zero contains only one move (<span class="highlight">e4</span>), the second one
+        contains two moves (<span class="highlight">e4 c5</span>), the third one three moves (<span class="highlight">e4 c5 Nf3</span>),
+         and so on. Once we have generated a certain number of tokens (the <span class="highlight">analysis depth</span>),
+        we insert a last token, which contains all moves.</li>
+        <li><strong>Continuation as payload</strong>. Each generated token is associated with a payload containing the next move to come. The payload for move zero
+        contains the first move of the game, and there's no payload for the last token (the whole move text), because there's no continuation.</li>
+    </ul>
+
+    <img src="resources/images/movetext.png"  alt="Move text" />
+    
+    <p>The point of this model is as follows:</p>
+    <ul>
+        <li>We want to find games matching a certain opening sequences. We could have indexed the whole move text as a single token, and used a 
+        <span class="highlight">PrefixQuery</span> on it (e.g. find all games starting by <span class="highlight">e4 c5</span>),
+        but such queries are slow on large volumes of documents. I have therefore chosen to generate "move-grammed" tokens, so as to use
+        the very fast <span class="highlight">TermQuery</span> on them, searching for an exact match. This only works up to the analysis depth, beyond which we
+        still have to fall back on prefix queries - but the number of games to be searched at this point should have been greatly reduced, 
+        allowing for good performance nevertheless.</li>
+        <li>For each search, we want to provide the user with possible continuations and associated statistics (who wins and so on). To do so,
+        we have stored each continuation on each token, and perform aggregation calculations at search time, using a custom collector. In other words,
+        if you search for <span class="highlight">e4 c5</span>, you'll know that there's 611 games with a <span class="highlight">Nf3</span> continuation, 47% of which
+        are won by white.</li>
+    </ul>
+    
+    <p>The following schema summarizes all the extensions I have made in order to perform move queries:</p>
+
+    <img src="resources/images/extensions.png"  alt="extensions" />
+    
+    <p>Provided you know a bit about Lucene objects and their lifecycles, there should not be any difficult content, as the library is used in a standard way.</p>
+
+    <h3 id="luchess-web-framework">Luchess-web-framework</h3>
+    
+    <p>Luchess comes with its own <a href="http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller">MVC</a>-based web framework.
+    It works in a standard fashion:</p>
+    <ul>
+        <li>A special filter, named <span class="highlight">ResourceDispatcher</span>, is set up to receive all requests. It sends back static content directly,
+        and forward applicative content to a single front controller, the <span class="highlight">FrontServlet</span>.</li>
+        <li>The front servet, at initialization, is configured with an <span class="highlight">ApplicationContext</span>,
+        from which it can grab a <span class="highlight">Router</span> and a <span class="highlight">Presenter</span>.</li>
+        <li>For a given request, the servlet uses the router to find out which <span class="highlight">Controller</span> is to be used to process the request.</li>
+        <li>It then creates the controller and invoke it, automatically feeding request parameters to whatever data transfer object
+         has been defined as the controller argument.</li>
+        <li>The controller processes the request using its own domain logic, then returns a <span class="highlight">Result</span>, containing a view name and a
+        <span class="highlight">Model</span>.</li>
+        <li>The servlet uses its presenter to create a <span class="highlight">View</span> object from the returned view name. It then
+        asks the view to display itself, and we're done.</li>
+    </ul>
+    
+    <p>Example of a <span class="highlight">web.xml</span> file:</p>
+    
+    <img src="resources/images/web.xml.png"  alt="web.xml" />
+    
+    <p>The dispatching algorithm (can't get simpler, can it?):</p>
+    
+    <img src="resources/images/dispatch.png"  alt="Dispatching algorithm" class="code" />
+    
+    <p>Now, let's discuss details a bit more.</p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Object</th>
+                <th>Comments</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="highlight">ApplicationContext</span></td>
+                <td>
+                The framework must be initialized with an <span class="highlight">ApplicationContextFactory</span>, from which it can
+                create a singleton application context. The factory must be provided by the client, its fully qualified name properly specified in the
+                web.xml configuration file.
+                The main role of the context is to provide a router and a presenter (see below),
+                but clients can also use it as some sort of global namespace for their own application objects.                 
+                </td>
+            </tr>
+            <tr>
+                <td><span class="highlight">WebContext</span></td>
+                <td>The <span class="highlight">WebContext</span> is a simple wrapper for an http request and an http response. There's one
+               rule the framework imposes on clients though: controllers shall never have access to JEE objects, such as requests, responses, sessions and so on.
+               This has been made so in order to reduce dependencies and enforce good testability.</td>
+            </tr>
+            <tr>
+                <td><span class="highlight">Router</span></td>
+                <td>The <span class="highlight">Router</span> can resolve a WebContext to find which controller should be used. Additionally,
+                routers may provide a list of all controllers known to them, and reverse a controller into a corresponding matching URL.
+                Clients may provide their own routing implementation, or re-use the ones the framework so far offers:
+                a <span class="highlight">PathBasedRouter</span>, which derived the name of the controller from the path, concatenating
+                path parts into a name, or a <span class="highlight">FQNBasedRouter</span>, which expects the name of the controller to be provided
+                as a parameter of the request.</td>
+            </tr>
+            <tr>
+                <td><span class="highlight">Controller</span></td>
+                <td>Any POJO can act as a <span class="highlight">controller</span>. It does not need to implement any interface or extend
+                any base class, but simply must have one public method annotated with a <span class="highlight">@Controller</span> annotation.
+                This method must return a <span class="highlight">Result</span>, containing the name of the view to be displayed and the model to be fed
+                to the view. It may have zero or one argument, and when provided, the argument must be a JavaBean-compliant object, the properties
+                of which will be injected with values taken from the request parameters.
+                <br/><br/>
+                <strong>Note</strong>: so far, all our controllers are stateless, meaning the framework does not give any access to the session.
+                If needed, one could however extend the framework, by having existing session data injected into a second argument,
+                and session data to be set, added as a new property of the Result object. 
+                </td>
+            </tr>
+            <tr>
+                <td><span class="highlight">WebRequest</span></td>
+                <td>The <span class="highlight">WebRequest</span> is a technical object in charge of executing a controller, i.e. finding the controller
+                method, creating the argument object, injecting it with request data, and finally invoking the method.
+                </td>
+            </tr>
+            <tr>
+                <td><span class="highlight">Presenter</span></td>
+                <td>The <span class="highlight">Presenter</span> can resolve a view name returned by a controller into a <span class="highlight">View</span> object.
+                As for the router, clients may provide their own implementations, or re-use one of those offered by the framework:
+                a <span class="highlight">FreemarkerPresenter</span>, which uses <a href="http://freemarker.org/">Freemarker</a> to render its views, or 
+                a <span class="highlight">FQNBasedPresenter</span>, in which the view name indicates the fully-qualifed name of the view to be displayed.
+                The framework has been made so it could be easily extended with other view presenters, such as JSP or <a href="http://velocity.apache.org/">Velocity</a>.
+                <br />
+                <br />
+                <strong>Note</strong>: the Freemarker presenter and related objects support internationalization through standard bundle files, and
+                provides additional methods to be used in templates, such as translations and url rebasing.    
+                </td>
+            </tr>
+            <tr>
+                <td><span class="highlight">View</span></td>
+                <td>The <span class="highlight">View</span> can display itself, i.e. writing content to the response, using a template or not, injecting model data as they
+                see fit.   
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h3 id="luchess-web-client">Luchess-web-client</h3>
+    
+    <p>The Luchess-web-client binds together other Luchess modules: it is a web application, based on the Luchess-web-framework, working with the services
+    API and objects defined in Luchess-core, injected with a Luchess-app-lucene4x implementation.</p>
+    
+    <p>The module defines its own <span class="highlight">ApplicationContext</span>, customized with the <span class="highlight">PathBasedRouter</span>
+    and <span class="highlight">FreemarkerPresenter</span> provided by the web framework. In addition to these standard functions, the context also loads, configures 
+    and keeps in memory a Luchess
+    <span class="highlight">ServicesFactory</span>, using a custom property file.</p>
+    
+    <p>There's actually very little to tell about the module, because it's pretty straightforward, as 
+    the domain logic is delegated to the Luchess-core and Luchess-app-lucene4x modules, while the flow processing logic is handled by the Luchess-web-framework module. 
+    To give you an overview of all functions covered, here goes a quick presentation of all controllers used by the application:</p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Controllers</th>
+                <th>Comments</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="highlight">BuildController</span></td>
+                <td>Used to launch a build process in the background. The progress of the indexing is tracked thanks to a standard index monitor, stored
+                on the client context.</td>
+            </tr>
+            <tr>
+                <td><span class="highlight">CountController</span></td>
+                <td>Used to grab and return the total number of games in the index. Note that the returned view is of type JSON, so this controller is meant to be
+                called by an XmlHttpRequest call.</td>
+            </tr>
+            <tr>
+                <td><span class="highlight">ErrorController</span></td>
+                <td>The application automatically calls this controller each time there's a server error. All captured server errors have been defined in the web.xml.</td>
+            </tr>
+            <tr>
+                <td><span class="highlight">IndexController</span></td>
+                <td>Default page controller, which displays the index content, as well as the button to run an indexing process.</td>
+            </tr>
+            <tr>
+                <td><span class="highlight">ListController</span></td>
+                <td>Grabs search parameters, perform a GameListQuery, and sends the result back. This controller shares the same view as the 
+                <span class="highlight">SearchController</span>.</td>
+            </tr>
+            <tr>
+                <td><span class="highlight">LoadController</span></td>
+                <td>Looks up a game by its ID, then returns the same view as the <span class="highlight">ListController</span>, including the found game. The view, if a game is available,
+                loads it in the search form, so that the user can navigate it, using the provided board.</td>
+            </tr>
+            <tr>
+                <td><span class="highlight">MoveController</span></td>
+                <td>Used to determine which move the user has made on the board. Once the user moves a piece, the position and the start/end coordinates
+                are transmitted to the controller, which uses domain helpers to determine and send back the PGN value for the move, to be included in the search form.</td>
+            </tr>
+            <tr>
+                <td><span class="highlight">ProgressController</span></td>
+                <td>Called every second during an indexing process. It grabs the number of games currently indexed,
+                 as well as the elapsed indexing duration,
+                so as to report them to the user.</td>
+            </tr>
+            <tr>
+                <td><span class="highlight">SaveController</span></td>
+                <td>Used when a user wants to download a game. Given the proper ID, the controller retrieves the game
+                and sends it back as an attachment - the <span class="highlight">FreemarkerView</span> provided by the framework permitting such a configuration.</td>
+            </tr>
+            <tr>
+                <td><span class="highlight">SearchController</span></td>
+                <td>Used to display the search form. It actually provides the base content for any search-based view.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3 id="luchess-web-launcher">Luchess-web-launcher</h3>
+    
+    <p>The launcher is an independent piece of software, intended for users who do not have a web server installed. It basically embeds its own web server
+    (<a href="http://www.eclipse.org/jetty/">Jetty</a>), and provides a simple user interface to start/stop the server, loading the first
+    <span class="highlight">.war</span> file discovered in the current directory.</p>
+    
+    <p>The graphical technology I used is Swing. I confess that I am not familiar with it, so the application architecture might not be optimal!
+    I have applied usual object-oriented design principles such as low coupling and responsibility encapsulation, ending with:</p>
+    
+    <ul>
+        <li>A <strong>services</strong> package, separating services definitions from their implementations.
+        The <span class="highlight">ServerService</span> lets you start and stop a server, while the
+        <span class=highlight">WebAppService</span> provides you with a web app object, holding all data necessary to find and load the application.
+        I have provided a single implementation for each of these services, a <span class="highlight">JettyServerService</span> embedding
+        a Jetty server, and a <span class="highlight">AnyWarWebAppService</span> implementation which returns the first
+        <span class="highlight">.war</span> file found in the same directory of the launcher.</li>
+        <li>A <strong>ui</strong> package, containing the definition of the screen, referencing the services interfaces (the implementations of which 
+        being injected at screen creation). The package is separated in two parts: common utilities and screens. Each screen (there's only one here: the console)
+        is further separated in two parts: the components it contains, and the main screen, articulating all components. All components do not inherit Swing objects
+        but rather compose them, as I believe preserving the inheritance trail is important (for instance you could want a parent component object to manage
+        cross-cutting concerns, such as logging or security).</li>
+    </ul>
+    
+    <p>The launcher, beyond the functions of simply starting / stopping the server, also provides a view of all log calls. I had to define a hard dependency on
+    <a href="http://logback.qos.ch/">Logback</a> for this, as I needed to register my own appender to capture appropriate log calls. As such, I am not sure that
+    applications using a logging mechanism not compatible with <a href="http://www.slf4j.org/">SLF4J</a> will have their log calls correctly reported
+    (I have not tested it).
+    </p>
+        
+    <p>Also, working with Swing was the opportunity for me to discover <a href="https://code.google.com/p/fest/">FEST</a>, a robot-based test
+    framework that let me validate the console screen. It was pretty fun to see all the animations on screen, although that can be a problem is another software
+    interacts with the windowing system at the same time. Incidentally, I was happy to find out that low coupling of
+    services interfaces worked great here, as I could simply inject services mocks to have the screen validated.</p>
+    
+    <p>That's all! Thanks for reading. I hope that you have fun reading and re-using the source code.</p>
+    
+</div>
+</body>
+</html>

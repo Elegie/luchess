@@ -1,0 +1,10 @@
+[White "Foo, Bar"]
+[Black "Foo, Baz"]
+[WhiteElo "2500"]
+[BlackElo "2400"]
+[IgnoredTag "Ignored tag value"]
+[Result "1-0"]
+
+1.e4 (1.e5 2.f4) 1...Nf6 $42 { start of comment,
+right after a NAG token } ;end of line comment
+2.d4 d6 (2...d5 {dubious} ) 3.a3 a6 4.a4 1-0
